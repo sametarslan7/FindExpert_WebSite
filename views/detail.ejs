@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title><%= worker.name %> - Profil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style> body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; font-size: 0.9rem; padding-top: 80px; } </style>
+</head>
+<body>
+
+<!-- NAVBAR (Misafir uyumlu) -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top py-2 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-warning fs-5" href="/">UstaBul</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/worker-panel">İş Pazarı</a></li>
+                
+                <% if (user) { %>
+                    <li class="nav-item"><a class="nav-link" href="/inbox">Mesajlar</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Profilim
+                            <!-- BİLDİRİM ROZETİ BURADA -->
+                            <% if(locals.totalNotificationCount > 0) { %> 
+                                <span class="badge bg-danger rounded-pill"><%= totalNotificationCount %></span> 
+                            <% } %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">İşveren</h6></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/profile">
+                                    <span><i class="bi bi-briefcase"></i> İşveren Paneli</span>
+                                    <% if(locals.empNotificationCount > 0) { %>
+                                        <span class="badge bg-danger rounded-pill ms-2"><%= empNotificationCount %></span>
+                                    <% } %>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">Usta</h6></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/worker/profile">
+                                    <span><i class="bi bi-tools"></i> İşçi Paneli</span>
+                                    <% if(locals.workerNotificationCount > 0) { %>
+                                        <span class="badge bg-danger rounded-pill ms-2"><%= workerNotificationCount %></span>
+                                    <% } %>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a></li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item ms-2"><a class="nav-link text-white" href="/login">Giriş</a></li>
+                    <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold text-dark px-4 rounded-pill" href="/register">Kayıt Ol</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                <img src="<%= worker.image %>" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body p-3">
+                    <h5 class="fw-bold text-center mb-0"><%= worker.name %></h5>
+                    <p class="text-center text-muted small mb-3"><%= worker.job %></p>
+                    
+                    <div class="d-flex justify-content-between text-center border-top border-bottom py-2 mb-3 bg-light rounded">
+                        <div class="w-50 border-end"><div class="text-warning fw-bold">★ <%= worker.rating %></div><small class="text-muted">Puan</small></div>
+                        <div class="w-50"><div class="text-primary fw-bold"><%= worker.dailyRate %> TL</div><small class="text-muted">Günlük</small></div>
+                    </div>
+
+                    <!-- MİSAFİR KONTROLÜ -->
+                    <% if (!user) { %>
+                        <div class="alert alert-warning text-center small mb-0 border-warning">
+                            <i class="bi bi-lock-fill fs-4 d-block mb-2"></i>
+                            Mesaj atmak veya teklif göndermek için lütfen <a href="/login" class="fw-bold text-dark">Giriş Yapın</a>.
+                        </div>
+                    <% } else { %>
+                        
+                        <!-- ÜYE İSE -->
+                        <% if (user._id.toString() === worker._id.toString()) { %>
+                            <div class="alert alert-info text-center small mb-0 border-info">Bu sizin kendi profiliniz.</div>
+                        <% } else { %>
+                            <a href="/chat/<%= worker._id %>" class="btn btn-outline-info w-100 mb-2 btn-sm fw-bold"><i class="bi bi-chat-dots"></i> Mesaj At</a>
+                            <div class="bg-white p-3 rounded border">
+                                <h6 class="fw-bold mb-2 small text-primary">Teklif Gönder</h6>
+                                <form action="/send-offer/<%= worker._id %>" method="POST">
+                                    <div class="mb-2"><textarea name="jobDescription" class="form-control form-control-sm" placeholder="İş tanımı..." rows="2" required></textarea></div>
+                                    <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Kirala</button>
+                                </form>
+                            </div>
+                        <% } %>
+
+                    <% } %>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ TARAFI (AYNI KALDI) -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold border-bottom pb-2 mb-3">Hakkında</h6>
+                    <p class="small text-muted"><%= worker.about %></p>
+                    <div><span class="badge bg-secondary me-1"><%= worker.experience %> Tecrübe</span><span class="badge bg-secondary"><%= worker.job %></span></div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Değerlendirmeler</h6>
+                    <% if(worker.reviews && worker.reviews.length > 0) { %>
+                        <% worker.reviews.forEach(function(review) { %>
+                            <div class="border rounded p-3 mb-2 bg-light">
+                                <div class="d-flex justify-content-between"><h6 class="fw-bold mb-0 small"><%= review.owner %></h6><span class="badge bg-success">★ <%= review.score %></span></div>
+                                <p class="text-muted mb-0 small">"<%= review.comment %>"</p>
+                            </div>
+                        <% }); %>
+                    <% } else { %> <div class="alert alert-light border small">Henüz yorum yok.</div> <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

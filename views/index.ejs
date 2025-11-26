@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>UstaBul</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            font-size: 0.9rem;
+            padding-top: 80px;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=1931&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            padding: 80px 0;
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid #ffc107;
+            border-radius: 0 0 20px 20px;
+            margin-top: -20px;
+        }
+
+        .worker-card {
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .worker-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .worker-img {
+            height: 180px;
+            object-fit: cover;
+            width: 100%;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- GÜNCEL NAVBAR (Misafir / Üye Kontrollü) -->
+    <!-- NAVBAR KISMI -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top py-2 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-warning fs-5" href="/">UstaBul</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/worker-panel">İş Pazarı</a></li>
+                
+                <% if (user) { %>
+                    <li class="nav-item"><a class="nav-link" href="/inbox">Mesajlar</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Profilim
+                            <!-- BİLDİRİM ROZETİ BURADA -->
+                            <% if(locals.totalNotificationCount > 0) { %> 
+                                <span class="badge bg-danger rounded-pill"><%= totalNotificationCount %></span> 
+                            <% } %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">İşveren</h6></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/profile">
+                                    <span><i class="bi bi-briefcase"></i> İşveren Paneli</span>
+                                    <% if(locals.empNotificationCount > 0) { %>
+                                        <span class="badge bg-danger rounded-pill ms-2"><%= empNotificationCount %></span>
+                                    <% } %>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">Usta</h6></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/worker/profile">
+                                    <span><i class="bi bi-tools"></i> İşçi Paneli</span>
+                                    <% if(locals.workerNotificationCount > 0) { %>
+                                        <span class="badge bg-danger rounded-pill ms-2"><%= workerNotificationCount %></span>
+                                    <% } %>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a></li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item ms-2"><a class="nav-link text-white" href="/login">Giriş</a></li>
+                    <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold text-dark px-4 rounded-pill" href="/register">Kayıt Ol</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <div class="hero-section">
+        <div class="container">
+            <h2 class="fw-bold mb-2">En İyi Ustayı Bul</h2>
+            <p class="opacity-75 mb-4 small">Güvenilir ve puanlı ustalar parmaklarınızın ucunda.</p>
+            <div class="card p-2 border-0 shadow-lg mx-auto bg-white rounded-pill" style="max-width: 500px;">
+                <form action="/" method="GET" class="d-flex gap-2">
+                    <select name="category" class="form-select border-0 bg-transparent ps-3" style="font-size: 0.9rem;">
+                        <% categories.forEach(cat=> { %> <option value="<%= cat %>" <%=selectedCategory===cat
+                                ? 'selected' : '' %>><%= cat %>
+                            </option>
+                            <% }) %>
+                    </select>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4 fw-bold">Ara</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row">
+            <% workers.forEach(function(worker) { %>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card worker-card h-100">
+                        <img src="<%= worker.image %>" class="worker-img" alt="<%= worker.name %>">
+                        <div class="card-body text-center p-3">
+                            <h6 class="fw-bold mb-1">
+                                <%= worker.name %>
+                            </h6>
+                            <span class="badge bg-light text-dark border mb-2">
+                                <%= worker.job %>
+                            </span>
+                            <div class="d-flex justify-content-center gap-2 small text-muted mb-3"><span><i
+                                        class="bi bi-star-fill text-warning"></i>
+                                    <%= worker.rating %>
+                                </span><span>•</span><span>
+                                    <%= worker.dailyRate %> TL/Gün
+                                </span></div>
+                            <a href="/worker/<%= worker._id %>"
+                                class="btn btn-outline-dark btn-sm w-100 rounded-pill">İncele</a>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

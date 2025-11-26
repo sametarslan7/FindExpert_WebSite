@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesajlar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; font-size: 0.9rem; padding-top: 80px; }
+        .list-group-item:hover { background-color: #f1f3f5; }
+    </style>
+</head>
+<body>
+
+<!-- GÜNCEL NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top py-2 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-warning fs-5" href="/">UstaBul</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/worker-panel">İş Pazarı</a></li>
+                
+                <% if (user) { %>
+                    <li class="nav-item"><a class="nav-link" href="/inbox">Mesajlar</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Profilim
+                            <!-- BİLDİRİM ROZETİ BURADA -->
+                            <% if(locals.totalNotificationCount > 0) { %> 
+                                <span class="badge bg-danger rounded-pill"><%= totalNotificationCount %></span> 
+                            <% } %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">İşveren</h6></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/profile">
+                                    <span><i class="bi bi-briefcase"></i> İşveren Paneli</span>
+                                    <% if(locals.empNotificationCount > 0) { %>
+                                        <span class="badge bg-danger rounded-pill ms-2"><%= empNotificationCount %></span>
+                                    <% } %>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">Usta</h6></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/worker/profile">
+                                    <span><i class="bi bi-tools"></i> İşçi Paneli</span>
+                                    <% if(locals.workerNotificationCount > 0) { %>
+                                        <span class="badge bg-danger rounded-pill ms-2"><%= workerNotificationCount %></span>
+                                    <% } %>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a></li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item ms-2"><a class="nav-link text-white" href="/login">Giriş</a></li>
+                    <li class="nav-item"><a class="btn btn-warning btn-sm fw-bold text-dark px-4 rounded-pill" href="/register">Kayıt Ol</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold py-3 border-bottom">
+                    💬 Mesaj Kutusu
+                </div>
+                <div class="list-group list-group-flush">
+                    <% if(conversations.length === 0) { %>
+                        <div class="text-center py-5 text-muted small">
+                            <i class="bi bi-chat-square-text fs-1 d-block mb-2"></i>
+                            Henüz mesajınız yok.
+                        </div>
+                    <% } %>
+
+                    <% conversations.forEach(contact => { %>
+                        <a href="/chat/<%= contact.id %>" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
+                            <div style="width:45px; height:45px; background:#dee2e6; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem;">
+                                <%= contact.name.charAt(0) %>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 fw-bold text-dark"><%= contact.name %></h6>
+                                <small class="text-muted"><%= contact.type %></small>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BU SCRIPT EKLENDİĞİ İÇİN ARTIK MENÜ AÇILACAK -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

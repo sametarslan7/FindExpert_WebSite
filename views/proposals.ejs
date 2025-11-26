@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gelen Teklifler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+            padding-top: 80px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- FIXED NAVBAR (DROPDOWN EKLENDİ) -->
+    <!-- GÜNCEL NAVBAR (Bildirimler Ayrıldı) -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top py-2 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-warning fs-5" href="/">UstaBul</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/worker-panel">İş Pazarı</a></li>
+                <li class="nav-item"><a class="nav-link" href="/inbox">Mesajlar</a></li>
+                
+                <!-- PROFİLİM DROPDOWN -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                        Profilim
+                        <% if(locals.totalNotificationCount > 0) { %> 
+                            <span class="badge bg-danger rounded-pill"><%= totalNotificationCount %></span> 
+                        <% } %>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                        <!-- İŞVEREN KISMI -->
+                        <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">İşveren</h6></li>
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center" href="/profile">
+                                <span><i class="bi bi-briefcase"></i> İşveren Paneli</span>
+                                <% if(locals.empNotificationCount > 0) { %>
+                                    <span class="badge bg-danger rounded-pill ms-2"><%= empNotificationCount %></span>
+                                <% } %>
+                            </a>
+                        </li>
+                        
+                        <li><hr class="dropdown-divider"></li>
+                        
+                        <!-- İŞÇİ KISMI -->
+                        <li><h6 class="dropdown-header text-muted text-uppercase small fw-bold">Usta</h6></li>
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center" href="/worker/profile">
+                                <span><i class="bi bi-tools"></i> İşçi Paneli</span>
+                                <% if(locals.workerNotificationCount > 0) { %>
+                                    <span class="badge bg-danger rounded-pill ms-2"><%= workerNotificationCount %></span>
+                                <% } %>
+                            </a>
+                        </li>
+                        
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger fw-bold" href="/logout"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <div class="container">
+        <h5 class="fw-bold mb-4 border-start border-4 border-warning ps-3">Gelen İş Başvuruları</h5>
+
+        <% if(jobsWithProposals.length===0) { %>
+            <div class="alert alert-light border text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="mt-2 text-muted">Henüz ilanlarınıza gelen bir teklif yok.</p>
+            </div>
+            <% } %>
+
+                <div class="row">
+                    <% jobsWithProposals.forEach(market=> { %>
+                        <div class="col-12 mb-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white py-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold m-0">
+                                                <%= market.description %>
+                                            </h6>
+                                            <small class="text-muted">
+                                                <%= market.category %> • <%= market.budget %> TL
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-light text-dark border">
+                                            <%= market.proposals.length %> Başvuru
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="list-group list-group-flush">
+                                    <% market.proposals.forEach(prop=> { %>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div
+                                                        style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                                                        <%= prop.workerName.charAt(0) %>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 fw-bold">
+                                                            <%= prop.workerName %>
+                                                        </h6>
+                                                        <small class="text-muted">
+                                                            <%= prop.date %>
+                                                        </small>
+                                                        <% if(prop.status==='Reddedildi' ) { %> <span
+                                                                class="badge bg-danger ms-2">Reddedildi</span>
+                                                            <% } %>
+                                                    </div>
+                                                </div>
+
+                                                <% if(!prop.status || prop.status==='Bekliyor' ) { %>
+                                                    <div class="d-flex gap-2">
+                                                        <a href="/chat/<%= prop.workerId %>?role=employer"
+                                                            class="btn btn-outline-secondary btn-sm">Mesaj</a>
+                                                        <form
+                                                            action="/employer/accept-proposal/<%= market.id %>/<%= prop.workerId %>"
+                                                            method="POST" class="m-0"><button
+                                                                class="btn btn-success btn-sm fw-bold px-3">Onayla</button>
+                                                        </form>
+                                                        <form
+                                                            action="/employer/reject-proposal/<%= market.id %>/<%= prop.workerId %>"
+                                                            method="POST" class="m-0"><button
+                                                                class="btn btn-outline-danger btn-sm fw-bold px-3">Reddet</button>
+                                                        </form>
+                                                    </div>
+                                                    <% } else { %>
+                                                        <span class="text-muted fst-italic small">İşlem yapıldı</span>
+                                                        <% } %>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
